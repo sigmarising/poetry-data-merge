@@ -45,13 +45,15 @@ class GxdsHandler(BasicHandler):
                         "title": "",
                         "content": "",
                         "comment": "",
+                        "flush": False
                     }  # yield 的内容
 
                     if self._show_log:
                         s: str = "-".join((text_target["dynasty"], text_target["author"]))
-                        print(ColorLogDecorator.blue("正在处理-国学大师：" + s))
+                        print(ColorLogDecorator.green("正在处理-国学大师：" + s))
 
-                    for item in text_raw["items"]:  # 每首诗
+                    len_raw: int = len(text_raw["items"])
+                    for i, item in enumerate(text_raw["items"]):  # 每首诗
                         content: str = str()
                         comment: str = str()
                         raw_text: list = self.__r1.split(item["content"])
@@ -64,16 +66,21 @@ class GxdsHandler(BasicHandler):
                             # 存在正文和注释
                             content = raw_text[0]
                             comment = " | ".join(raw_text[1:])
-                        content = "".join(self.__r2.split(content))
-                        content = "".join(self.__r3.split(content))
-                        content = "".join(self.__r4.split(content))
 
                         if content.strip() == "":
                             continue
+
+                        content = "".join(self.__r2.split(content))
+                        content = "".join(self.__r3.split(content))
+                        content = "".join(self.__r4.split(content))
 
                         text_target["title"] = item["title"].strip()
                         text_target["content"] = content.strip()
                         text_target["comment"] = comment.strip()
 
                         self._summary_add(text_target["dynasty"], text_target["author"])
+
+                        if i == len_raw - 1:
+                            text_target["flush"] = True
+
                         yield text_target

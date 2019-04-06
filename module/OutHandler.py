@@ -22,6 +22,11 @@ class OutHandler(BasicHandler):
         BasicHandler.__init__(self, root_path, show_log)  # 基类构造函数
         self.__threshold_cos = threshold_cos  # 余弦距离阈值
         self.__threshold_pre = threshold_pre  # 百分比阈值
+        self.__cache = {
+            "dynasty": "",
+            "author": "",
+            "poems": []
+        }  # 对于同一个 朝代-诗人 的内存缓存
 
     def poems(self):
         pass
@@ -29,59 +34,61 @@ class OutHandler(BasicHandler):
     def insert(self, obj: dict) -> None:
         """
         public: 带去重的诗词插入
-        :param obj: {dynasty, author, title, content, comment}
+        :param obj: {dynasty, author, title, content, comment, flush}
         :return: None
         """
-        if self._show_log:
-            s: str = "-".join((obj["dynasty"], obj["author"], obj["title"]))
-            print(ColorLogDecorator.yellow("合并处理：" + s, "strong"))
-
         dynasty_path: str = os.path.join(self._root_path, obj["dynasty"])
         file_path: str = os.path.join(dynasty_path, obj["author"] + ".json")
-        need_create_new_file: bool = False
 
-        if not os.path.exists(dynasty_path):
-            os.makedirs(dynasty_path)
-            need_create_new_file = True
-
-        if not os.path.exists(file_path):
-            need_create_new_file = True
-
-        if need_create_new_file:
-            f = open(file_path, "w+", encoding="utf-8", errors="ignore")
-            target: dict = {
-                "dynasty": obj["dynasty"],
-                "author": obj["author"],
-                "poems": [{
-                    "title": obj["title"],
-                    "content": obj["content"],
-                    "comment": obj["comment"]
-                }]
-            }
-            json.dump(target, f, ensure_ascii=False, indent=4)
-            f.close()
+        if self.__cache["dynasty"] == obj["dynasty"] and self.__cache["author"] == obj["author"]:
+            # 可以使用缓存操作
+            pass
         else:
-            f = open(file_path, "r", encoding="utf-8", errors="ignore")
-            origin: dict = json.load(f)
-            f.close()
+            # 缓存未名中 需初始化操作
+            if not os.path.exists(dynasty_path):  # 若朝代目录不存在 则创建
+                os.makedirs(dynasty_path)
 
-            poems_list: list = origin["poems"]
-            poems_same_name: list = []
-            for item in poems_list:
-                if item["title"] == obj["title"]:
-                    poems_same_name.append(item)
+            if os.path.exists(file_path):  # 若作者json存在 则读取并初始化缓存
+                origin: dict
+                with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                    origin = json.load(f)
+                self.__cache = {
+                    "dynasty": origin["dynasty"],
+                    "author": origin["author"],
+                    "poems": origin["poems"]
+                }
+            else:  # 否则 只初始化缓存的朝代作者
+                self.__cache = {
+                    "dynasty": obj["dynasty"],
+                    "author": obj["author"],
+                    "poems": []
+                }
 
-            need_insert = True
-            for item in poems_same_name:
-                if self.__is_similarity(obj["content"], item["content"]):
-                    need_insert = False
-                    break
+        need_insert: bool = True
+        for item in self.__cache["poems"]:
+            if self.__is_similarity(obj["content"], item["content"]):
+                # 发现相似文档 进行文档丰富性对比处理
+                if len(item["title"]) < len(obj["title"]):
+                    item["title"] = obj["title"]
+                if len(item["content"]) < len(obj["content"]):
+                    item["content"] = obj["content"]
+                if obj["comment"] != "":
+                    item["comment"] = " | ".join((item["comment"], obj["comment"]))
 
-            if need_insert:
-                origin["poems"].append(obj)
-                f = open(file_path, "w+", encoding="utf-8", errors="ignore")
-                json.dump(origin, f, ensure_ascii=False, indent=4)
-                f.close()
+                need_insert = False
+                break
+
+        if need_insert:
+            self.__cache["poems"].append({
+                "title": obj["title"],
+                "content": obj["content"],
+                "comment": obj["comment"]
+            })
+
+        if obj["flush"]:
+            with open(file_path, "w+", encoding="utf-8", errors="ignore") as f:
+                json.dump(self.__cache, f, ensure_ascii=False, indent=4)
+            self.__clear_cache()
 
     def __is_similarity(self, content1: str, content2: str) -> bool:
         """
@@ -104,17 +111,26 @@ class OutHandler(BasicHandler):
         v2 = v2 / v2.max()
         cos_num: float = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
 
-        count: int = 0
-        for char in content1:
-            if content2.find(char) != -1:
-                count += 1
-        common_pre: float = count / len(content1)
+        result: bool
+        if cos_num > self.__threshold_cos:
+            result = True
+        else:
+            result = False
 
         if self._show_log:
-            s: str = "cos_num: " + str(cos_num) + " | common_pre: " + str(common_pre)
-            print(ColorLogDecorator.yellow(s))
+            s1: str = ColorLogDecorator.blue("  cos value: " + str(cos_num))
+            s2: str = ColorLogDecorator.green(" True ", "bg") if result else ColorLogDecorator.red(" False ", "bg")
+            print(s1 + " " + s2)
 
-        if cos_num > self.__threshold_cos and common_pre > self.__threshold_pre:
-            return True
-        else:
-            return False
+        return result
+
+    def __clear_cache(self) -> None:
+        """
+        private: 清除缓存
+        :return: None
+        """
+        self.__cache = {
+            "dynasty": "",
+            "author": "",
+            "poems": []
+        }

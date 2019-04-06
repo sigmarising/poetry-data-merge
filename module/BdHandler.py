@@ -42,14 +42,15 @@ class BdHandler(BasicHandler):
                         "title": "",
                         "content": "",
                         "comment": "",
+                        "flush": False
                     }  # yield 的内容
 
                     if self._show_log:
                         s: str = "-".join((text_target["dynasty"], text_target["author"]))
-                        print(ColorLogDecorator.blue("正在处理-八斗文学：" + s))
+                        print(ColorLogDecorator.green("正在处理-八斗文学：" + s))
 
-
-                    for item in text_raw["poem"]:  # 每首诗
+                    len_raw: int = len(text_raw["poem"])
+                    for i, item in enumerate(text_raw["poem"]):  # 每首诗
                         content: str = item["content"].strip()
                         content = "".join(self.__r1.split(content))
 
@@ -61,4 +62,8 @@ class BdHandler(BasicHandler):
                         text_target["comment"] = item["comment"].strip()
 
                         self._summary_add(text_target["dynasty"], text_target["author"])
+
+                        if i == len_raw - 1:
+                            text_target["flush"] = True
+
                         yield text_target
