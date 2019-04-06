@@ -8,8 +8,11 @@ from module.ColorLogDecorator import ColorLogDecorator
 
 
 def main():
-    dataset1 = GxdsHandler(settings.ROOT_DIR_GXDS, False)
-    dataset2 = BdHandler(settings.ROOT_DIR_BD, False)
+    ColorLogDecorator.active()
+    print(ColorLogDecorator.blue("——————————开始处理——————————", "strong"))
+
+    dataset1 = GxdsHandler(settings.ROOT_DIR_GXDS, True)
+    dataset2 = BdHandler(settings.ROOT_DIR_BD, True)
     dataset_final = OutHandler(settings.ROOT_OUTPUT, settings.THRESHOLD_COS, settings.THRESHOLD_PRE, False)
 
     for item1 in dataset1.poems():
@@ -49,6 +52,7 @@ def main():
                 "poets": dataset_final.dynasties_poets
             }, f, ensure_ascii=False, indent=4)
 
+    print(ColorLogDecorator.blue("——————————处理完毕——————————", "strong"))
     print(ColorLogDecorator.green(" DONE ", "bg-strong"))
 
 

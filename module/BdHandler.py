@@ -34,28 +34,31 @@ class BdHandler(BasicHandler):
             for poet_file in os.listdir(dynasty_path):  # 作者
 
                 poet_file_path: str = os.path.join(dynasty_path, poet_file)
-                with open(poet_file_path, 'r', encoding='utf-8', errors='ignore') as f: # 每一个文件
-
+                with open(poet_file_path, 'r', encoding='utf-8', errors='ignore') as f:  # 每一个文件
                     text_raw: dict = json.load(f)
                     text_target: dict = {
-                        "dynasty": text_raw["dynasty"].strip(),
+                        "dynasty": dynasty.strip(),
                         "author": text_raw["poet"].strip(),
                         "title": "",
                         "content": "",
                         "comment": "",
                     }  # yield 的内容
 
+                    if self._show_log:
+                        s: str = "-".join((text_target["dynasty"], text_target["author"]))
+                        print(ColorLogDecorator.blue("正在处理-八斗文学：" + s))
+
+
                     for item in text_raw["poem"]:  # 每首诗
                         content: str = item["content"].strip()
                         content = "".join(self.__r1.split(content))
 
-                        text_target["title"] = item["title"].strip()
-                        text_target["content"] = content
-                        text_target["comment"] = item["comment"].strip()
+                        if content.strip() == "":
+                            continue
 
-                        if self._show_log:
-                            s: str = "-".join((text_target["dynasty"], text_target["author"], text_target["title"]))
-                            print(ColorLogDecorator.blue("已处理-八斗文学：" + s))
+                        text_target["title"] = item["title"].strip()
+                        text_target["content"] = content.strip()
+                        text_target["comment"] = item["comment"].strip()
 
                         self._summary_add(text_target["dynasty"], text_target["author"])
                         yield text_target

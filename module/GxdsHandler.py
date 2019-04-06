@@ -38,20 +38,24 @@ class GxdsHandler(BasicHandler):
 
                 poet_file_path: str = os.path.join(dynasty_path, poet_file)
                 with open(poet_file_path, 'r', encoding='utf-8', errors='ignore') as f:  # 每一个文件
-
                     text_raw: dict = json.load(f)
                     text_target: dict = {
-                        "dynasty": text_raw["dynasty"].strip(),
+                        "dynasty": dynasty.strip(),
                         "author": text_raw["author"].strip(),
                         "title": "",
                         "content": "",
                         "comment": "",
                     }  # yield 的内容
 
+                    if self._show_log:
+                        s: str = "-".join((text_target["dynasty"], text_target["author"]))
+                        print(ColorLogDecorator.blue("正在处理-国学大师：" + s))
+
                     for item in text_raw["items"]:  # 每首诗
                         content: str = str()
                         comment: str = str()
                         raw_text: list = self.__r1.split(item["content"])
+
                         if len(raw_text) == 1:
                             # 只有正文 无注释
                             content = raw_text[0]
@@ -64,13 +68,12 @@ class GxdsHandler(BasicHandler):
                         content = "".join(self.__r3.split(content))
                         content = "".join(self.__r4.split(content))
 
+                        if content.strip() == "":
+                            continue
+
                         text_target["title"] = item["title"].strip()
                         text_target["content"] = content.strip()
                         text_target["comment"] = comment.strip()
-
-                        if self._show_log:
-                            s: str = "-".join((text_target["dynasty"], text_target["author"], text_target["title"]))
-                            print(ColorLogDecorator.blue("已处理-国学大师：" + s))
 
                         self._summary_add(text_target["dynasty"], text_target["author"])
                         yield text_target

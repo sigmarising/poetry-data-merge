@@ -84,6 +84,14 @@ class OutHandler(BasicHandler):
                 f.close()
 
     def __is_similarity(self, content1: str, content2: str) -> bool:
+        """
+        private: 用于判断两个文本是否是相似的
+        :param content1: 文本1
+        :param content2: 文本2
+        :return:
+            True 相似
+            False 不相似
+        """
         space: list = list(set([x for x in content1 + content2]))
         c1: list = []
         c2: list = []
