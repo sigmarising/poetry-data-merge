@@ -13,7 +13,7 @@ from .ColorLogDecorator import ColorLogDecorator
 
 
 class OutHandler(BasicHandler):
-    def __init__(self, root_path: str, threshold_cos: float, threshold_pre: float, show_log: bool = False):
+    def __init__(self, root_path: str, threshold_cos: float, show_log: bool = False):
         """
         public: 构造函数
         :param root_path: 数据集路径
@@ -21,7 +21,6 @@ class OutHandler(BasicHandler):
         """
         BasicHandler.__init__(self, root_path, show_log)  # 基类构造函数
         self.__threshold_cos = threshold_cos  # 余弦距离阈值
-        self.__threshold_pre = threshold_pre  # 百分比阈值
         self.__cache = {
             "dynasty": "",
             "author": "",
