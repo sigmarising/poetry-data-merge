@@ -13,7 +13,7 @@ def main():
 
     dataset1 = GxdsHandler(settings.ROOT_DIR_GXDS, True)
     dataset2 = BdHandler(settings.ROOT_DIR_BD, True)
-    dataset_final = OutHandler(settings.ROOT_OUTPUT, settings.THRESHOLD_COS, False)
+    dataset_final = OutHandler(settings.ROOT_OUTPUT, settings.THRESHOLD_COS, settings.OUTPUT_COS, False)
 
     for item1 in dataset1.poems():
         dataset_final.insert(item1)

@@ -13,3 +13,6 @@ THRESHOLD_COS: float = 0.9
 # 是否输出 summary
 # 默认在 output 目录下
 OUTPUT_SUMMARY: bool = True
+
+# 是否输出 cos value 统计
+OUTPUT_COS: bool = True

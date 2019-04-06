@@ -13,7 +13,7 @@ from .ColorLogDecorator import ColorLogDecorator
 
 
 class OutHandler(BasicHandler):
-    def __init__(self, root_path: str, threshold_cos: float, show_log: bool = False):
+    def __init__(self, root_path: str, threshold_cos: float, output_cos: bool, show_log: bool = False):
         """
         public: 构造函数
         :param root_path: 数据集路径
@@ -21,11 +21,19 @@ class OutHandler(BasicHandler):
         """
         BasicHandler.__init__(self, root_path, show_log)  # 基类构造函数
         self.__threshold_cos = threshold_cos  # 余弦距离阈值
+        self.__output_cos = output_cos  # 是否输出余弦值到文件中
+        self.__file_cos = os.path.join(self._root_path, "cos_value.txt")
         self.__cache = {
             "dynasty": "",
             "author": "",
             "poems": []
         }  # 对于同一个 朝代-诗人 的内存缓存
+
+        if self.__output_cos:
+            if not os.path.exists(self._root_path):
+                os.makedirs(self._root_path)
+            with open(self.__file_cos, "w+", encoding="utf-8", errors="ignore") as f:
+                f.write("The Cos Value Summary:\n")
 
     def poems(self):
         pass
@@ -109,6 +117,12 @@ class OutHandler(BasicHandler):
         v1 = v1 / v1.max()
         v2 = v2 / v2.max()
         cos_num: float = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+
+        if self.__output_cos:
+            with open(self.__file_cos, "a", encoding="utf-8", errors="ignore") as f:
+                f.write("text1: " + content1 + "\n")
+                f.write("text2: " + content2 + "\n")
+                f.write(str(cos_num) + "\n")
 
         result: bool
         if cos_num > self.__threshold_cos:
