@@ -1,0 +1,36 @@
+{
+    "dynasty": "宋",
+    "poet": "戚明瑞",
+    "poem": [
+        {
+            "title": "诗一首",
+            "content": "蓝田战秦将，子婴竖降帻。至今柏树精，疑是卧龙魄。",
+            "comment": ""
+        },
+        {
+            "title": "句",
+            "content": "老槐阴下吹箜篌。",
+            "comment": ""
+        },
+        {
+            "title": "句",
+            "content": "旧梦不堪游螘国，生涯只合在渔舟。",
+            "comment": ""
+        },
+        {
+            "title": "句",
+            "content": "鸺鹠欢喜舞南风。",
+            "comment": ""
+        },
+        {
+            "title": "句",
+            "content": "望帝花飞春尚寒。",
+            "comment": ""
+        },
+        {
+            "title": "句",
+            "content": "才听黄鹂便断肠。",
+            "comment": ""
+        }
+    ]
+}
