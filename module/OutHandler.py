@@ -95,6 +95,7 @@ class OutHandler(BasicHandler):
                 continue
 
         if need_insert:
+            self._summary_add(obj["dynasty"], obj["author"])
             self.__cache["poems"].append({
                 "title": obj["title"],
                 "content": obj["content"],
