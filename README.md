@@ -8,12 +8,16 @@
 
 ## 环境配置
 
-* OS: Windows10 x64
-* Shell: PowerShell Core 6 (pwsh)
 * Python: 3.6.8
+* Numpy: 1.16.2
 
-建议使用 Python 虚拟环境 venv 建立工程环境。
+可通过 conda 或者 venv 环境，使用 requirements.txt 进行初始化。
 
 ## 开发相关
 
-详细的开发内容可参见 [开发笔记-DEVNOTES](./DEVNOTES.md)
+详细的开发相关内容可参见 [开发笔记-DEVNOTES](./DEVNOTES.md)
+
+
+## P.S.
+
+如果你仅仅需要数据集合并后的结果，你可以直接切换到 [Release 页面](https://github.com/sigmarising/poetry-data-merge/releases) 进行下载。
