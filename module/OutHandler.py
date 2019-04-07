@@ -73,17 +73,20 @@ class OutHandler(BasicHandler):
 
         need_insert: bool = True
         for item in self.__cache["poems"]:
-            if self.__is_similarity(obj["content"], item["content"]):
-                # 发现相似文档 进行文档丰富性对比处理
-                if len(item["title"]) < len(obj["title"]):
-                    item["title"] = obj["title"]
-                if len(item["content"]) < len(obj["content"]):
-                    item["content"] = obj["content"]
-                if obj["comment"] != "":
-                    item["comment"] = " | ".join((item["comment"], obj["comment"]))
+            if self.__is_similarity(obj["title"], item["title"]):  # 首先比较标题相似性
+                if self.__is_similarity(obj["content"], item["content"]):
+                    # 发现相似文档 进行文档丰富性对比处理
+                    if len(item["title"]) < len(obj["title"]):
+                        item["title"] = obj["title"]
+                    if len(item["content"]) < len(obj["content"]):
+                        item["content"] = obj["content"]
+                    if obj["comment"] != "":
+                        item["comment"] = " | ".join((item["comment"], obj["comment"]))
 
-                need_insert = False
-                break
+                    need_insert = False
+                    break
+            else:
+                continue
 
         if need_insert:
             self.__cache["poems"].append({
