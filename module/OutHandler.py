@@ -13,15 +13,18 @@ from .ColorLogDecorator import ColorLogDecorator
 
 
 class OutHandler(BasicHandler):
-    def __init__(self, root_path: str, threshold_cos: float, output_cos: bool, show_log: bool = False):
+    def __init__(self, root_path: str, threshold_cos: float, filter_len: int, output_cos: bool, show_log: bool = False):
         """
         public: 构造函数
-        :param root_path: 数据集路径
-        :param show_log: 是否显示 log，默认为 不显示
+        :param root_path: 输出根路径
+        :param threshold_cos: 余弦距离的阈值
+        :param filter_len: 限定初筛使用的子串长度
+        :param output_cos: 是否输出 cos 计算结果文件
+        :param show_log: 是否显示输出信息
         """
         BasicHandler.__init__(self, root_path, show_log)  # 基类构造函数
         self.__threshold_cos = threshold_cos  # 余弦距离阈值
-        self.__output_cos = output_cos  # 是否输出余弦值到文件中
+        self.__filter_len = filter_len  # 初筛的正文长度
         self.__file_cos = os.path.join(self._root_path, "cos_value.txt")
         self.__cache = {
             "dynasty": "",
@@ -29,6 +32,7 @@ class OutHandler(BasicHandler):
             "poems": []
         }  # 对于同一个 朝代-诗人 的内存缓存
 
+        self.__output_cos = output_cos  # 是否输出余弦值到文件中
         if self.__output_cos:
             if not os.path.exists(self._root_path):
                 os.makedirs(self._root_path)
@@ -73,7 +77,9 @@ class OutHandler(BasicHandler):
 
         need_insert: bool = True
         for item in self.__cache["poems"]:
-            if self.__is_similarity(obj["title"], item["title"]):  # 首先比较标题相似性
+            # 初筛正文的前 filter_len 个字符是否一致
+            if item["content"][0:self.__filter_len - 1] == obj["content"][0:self.__filter_len - 1]:
+                # 发现疑似相似文档 进行详细相似性对比
                 if self.__is_similarity(obj["content"], item["content"]):
                     # 发现相似文档 进行文档丰富性对比处理
                     if len(item["title"]) < len(obj["title"]):

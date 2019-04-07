@@ -7,8 +7,11 @@ ROOT_DIR_BD: str = 'input/8dou'
 # 输出路径
 ROOT_OUTPUT: str = 'output/'
 
-# 阈值 余弦夹角
+# 阈值 content 余弦相似度阈值
 THRESHOLD_COS: float = 0.9
+
+# 作为初筛的正文子串长度
+FILTER_LEN: int = 4
 
 # 是否输出 summary
 # 默认在 output 目录下
